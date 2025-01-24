@@ -1,11 +1,34 @@
 #include<GL/glut.h> 
 #include<math.h> 
-#include <GL/freeglut.h>
+#include<GL/freeglut.h>
+#include "board.h"
+#include "gui.h"
+#include<stdio.h>
 
 
+void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
+
+	char colstr[5];
+	sprintf(colstr, "%d", cell.pos);
+	
+	glRasterPos3f(p3.x - 20, p3.y - 10, 1);
+	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
+
+	// if(player1.playerIsInBoard && player1.position == cell.pos) {
+	// 	glRasterPos3f(p1.x + 20, p1.y + 10, 1);
+	// 	glutBitmapString(GLUT_BITMAP_8_BY_13, "You");
+	// }
+
+    glBegin(GL_POLYGON);
+        glVertex2i(p1.x, p1.y);
+        glVertex2i(p2.x, p2.y);
+        glVertex2i(p3.x, p3.y);
+        glVertex2i(p4.x, p4.y);
+    glEnd();
+}
 
 void slDrawBoard(void) {
-	// We are planing to draw equal size column 	
+	// We are planing to draw equal size SlCell 	
 	const int START_X  = 10;
 	const int START_Y = 10;
 
@@ -14,15 +37,15 @@ void slDrawBoard(void) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	char colstr[5];
-	sprintf(colstr, "%d",diceValue);
+	sprintf(colstr, "%d",slDiceValue);
 	glRasterPos3f(1560 - 20, 10, 1);
 	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
 	
 	int startX = START_X;
 	int startY = START_Y;
 
-	for(int i =0; i < GL_COLUMNS_SIZE; i++) {
-		struct Point p1, p2, p3, p4;	    
+	for(int i =0; i < SL_CELL_COUNT; i++) {
+		SlPoint p1, p2, p3, p4;	    
 		p1.x = startX;
 		p1.y = startY;
 
@@ -34,7 +57,7 @@ void slDrawBoard(void) {
 
 		p4.x = startX;
 		p4.y = startY + GL_CELL_WIDTH_AND_HEIGHT;
-		struct Column cell = slFindCell(i);
+		SlCell cell = slFindCell(i);
 		slDrawCell(p1, p2, p3, p4, cell);
 	
 		startX += GL_CELL_WIDTH_AND_HEIGHT;
@@ -72,7 +95,29 @@ void slMouseClick() {
 void slKeyboard(unsigned char key,
               int x, int y)
 {
-	diceValue = slRollTheDice();
-	slRunBoardComputation(board, &player1, diceValue);
+    slDiceValue = slRollTheDice();
+	//slRunBoardComputation(board, &player1, slDiceValue);
 	glutPostRedisplay();
+}
+
+
+void slGameWindowInit(int * argc, char ** argv) {
+   
+	glutInit(argc, argv); 
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); 
+      
+    // giving window size in X- and Y- direction 
+    glutInitWindowSize(1366, 768); 
+    glutInitWindowPosition(0, 0); 
+      
+    // Giving name to window 
+    glutCreateWindow("Snake and Ladder"); 
+	slInitWindowConfig();
+	glutDisplayFunc(slDrawBoard);
+	glutMouseFunc(slMouseClick);
+
+	 // Keyboard event handler
+    glutKeyboardFunc(slKeyboard);
+	glutMainLoop();
+	glFinish();
 }

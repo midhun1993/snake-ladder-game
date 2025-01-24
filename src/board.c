@@ -43,7 +43,7 @@ struct SlLadderPosition ladderPostions[SL_LADDER_COUNT] = {
 /** */
 
 SlCell slBoardInstance[SL_CELL_COUNT];
-int diceValue = 0;
+int slDiceValue = 0;
 
 void slBootstrapBoard(SlCell *board) {
     for(int i =0; i < SL_CELL_COUNT; i++ ){
@@ -85,6 +85,21 @@ void slDebugBoard(SlCell *board) {
 		printf("isLadderEntry: %d \n", board[i].isLadderEntry);
 		printf("isSnakeMouth: %d \n", board[i].isSnakeMouth);
 		printf("deltaValue: %d \n", board[i].deltaValue );
+	}
+}
+
+ SlCell slFindCell(int i) {
+	int flag = (int)((int)round(i/10)%2);
+	if(flag == 0) {
+		// normal
+		int indx = SL_CELL_COUNT - (i+1);
+		return slBoardInstance[indx];
+	} else {
+		// reverse
+		int r = (int)round(i  / 10) + 1;
+		int mod = (int) i % 10; 
+		int indx = SL_CELL_COUNT - (r * 10) + mod ;
+		return slBoardInstance[indx];
 	}
 }
 

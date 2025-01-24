@@ -17,8 +17,10 @@ typedef struct
 
 
 extern  SlCell slBoardInstance[SL_CELL_COUNT];
+extern int slDiceValue;
 
 void slBootstrapBoard(SlCell *boardInstace);
 int slRollTheDice(void);
 void slDebugBoard(SlCell *boardInstace);
+SlCell slFindCell(int i);
 #endif 

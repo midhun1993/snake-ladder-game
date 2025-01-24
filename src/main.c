@@ -156,7 +156,7 @@ void slDrawCell(struct Point p1, struct Point p2, struct Point p3, struct Point 
 
 void slDrawBoard(void) {
 	// We are planing to draw equal size column 
-	const int COLUMN_DISTANCE = 10;
+	const int COLUMN_DISTANCE = 80;
 	const int START_X  = 10;
 	const int START_Y = 10;
 
@@ -167,12 +167,12 @@ void slDrawBoard(void) {
 	int startX = START_X;
 	int startY = START_Y;
 
+	// Sample code for adding text
+	// glRasterPos3f(startX, startY, 1);
+	// glutBitmapCharacter(GLUT_BITMAP_8_BY_13, 'H');
+	
+
 	for(int i =0; i < GL_COLUMNS_SIZE; i++) {
-		startY += COLUMN_DISTANCE;
-		if((i+1)%10 == 0) {
-			startX = START_X;
-			startY = startY + COLUMN_DISTANCE;
-		}
 		struct Point p1, p2, p3, p4;	    
 		p1.x = startX;
 		p1.y = startY;
@@ -186,6 +186,12 @@ void slDrawBoard(void) {
 		p4.x = startX;
 		p4.y = startY + COLUMN_DISTANCE;
 		slDrawCell(p1, p2, p3, p4);
+
+		startX += COLUMN_DISTANCE;
+		if((i+1)%10 == 0) {
+			startX = START_X;
+			startY = startY + COLUMN_DISTANCE;
+		}
 	}
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnd(); 

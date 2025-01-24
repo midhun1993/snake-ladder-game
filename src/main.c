@@ -4,10 +4,12 @@
 #include<ncurses.h>
 #include<GL/glut.h> 
 #include<math.h> 
+#include <GL/freeglut.h>
 
 #define GL_COLUMNS_SIZE 100
 #define GL_SNAKE_COUNT 8
 #define GL_LADDER_COUNT 9
+#define GL_CELL_WIDTH_AND_HEIGHT 80
 
 struct Column  {
 	int pos;
@@ -61,6 +63,12 @@ struct LadderPosition ladderPos[GL_LADDER_COUNT] = {
 };
 
 struct Column board[GL_COLUMNS_SIZE];
+
+struct Player player1 = {
+		0, false
+};
+
+int diceValue = 0;
 
 void slBootstrapBoard(struct Column *board) {
 	for(int i =0; i < GL_COLUMNS_SIZE; i++ ){
@@ -137,14 +145,26 @@ void slStartGame( struct Column *board, struct Player *p1) {
 		printf("Press any key when you are ready!\n");
 		char c = getch();
 		endwin();
-		int diceValue = slRollTheDice();
+		diceValue = slRollTheDice();
 		slRunBoardComputation(board, p1, diceValue);
 		slShowPlayerStat(board, p1, diceValue);
 	}
 
 }
 
-void slDrawCell(struct Point p1, struct Point p2, struct Point p3, struct Point p4){
+void slDrawCell(struct Point p1, struct Point p2, struct Point p3, struct Point p4, struct Column cell){
+
+	char colstr[5];
+	sprintf(colstr, "%d", cell.pos);
+	
+	glRasterPos3f(p3.x - 20, p3.y - 10, 1);
+	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
+
+	if(player1.playerIsInBoard && player1.position == cell.pos) {
+		glRasterPos3f(p1.x + 20, p1.y + 10, 1);
+		glutBitmapString(GLUT_BITMAP_8_BY_13, "You");
+	}
+
     glBegin(GL_POLYGON);
         glVertex2i(p1.x, p1.y);
         glVertex2i(p2.x, p2.y);
@@ -153,44 +173,60 @@ void slDrawCell(struct Point p1, struct Point p2, struct Point p3, struct Point 
     glEnd();
 }
 
+struct Column slFindCell(int i) {
+	int flag = (int)((int)round(i/10)%2);
+	if(flag == 0) {
+		// normal
+		int indx = GL_COLUMNS_SIZE - (i+1);
+		return board[indx];
+	} else {
+		// reverse
+		int r = (int)round(i  / 10) + 1;
+		int mod = (int) i % 10; 
+		int indx = GL_COLUMNS_SIZE - (r * 10) + mod ;
+		return board[indx];
+	}
+
+}
+
 
 void slDrawBoard(void) {
-	// We are planing to draw equal size column 
-	const int COLUMN_DISTANCE = 80;
+	// We are planing to draw equal size column 	
 	const int START_X  = 10;
 	const int START_Y = 10;
 
 	glClear(GL_COLOR_BUFFER_BIT); 
 	glLineWidth(30);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	char colstr[5];
+	sprintf(colstr, "%d",diceValue);
+	glRasterPos3f(1560 - 20, 10, 1);
+	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
 	
 	int startX = START_X;
 	int startY = START_Y;
-
-	// Sample code for adding text
-	// glRasterPos3f(startX, startY, 1);
-	// glutBitmapCharacter(GLUT_BITMAP_8_BY_13, 'H');
-	
 
 	for(int i =0; i < GL_COLUMNS_SIZE; i++) {
 		struct Point p1, p2, p3, p4;	    
 		p1.x = startX;
 		p1.y = startY;
 
-		p2.x = startX + COLUMN_DISTANCE;
+		p2.x = startX + GL_CELL_WIDTH_AND_HEIGHT;
 		p2.y = startY;
 
-		p3.x = startX + COLUMN_DISTANCE;
-		p3.y = startY + COLUMN_DISTANCE;
+		p3.x = startX + GL_CELL_WIDTH_AND_HEIGHT;
+		p3.y = startY + GL_CELL_WIDTH_AND_HEIGHT;
 
 		p4.x = startX;
-		p4.y = startY + COLUMN_DISTANCE;
-		slDrawCell(p1, p2, p3, p4);
-
-		startX += COLUMN_DISTANCE;
+		p4.y = startY + GL_CELL_WIDTH_AND_HEIGHT;
+		struct Column cell = slFindCell(i);
+		slDrawCell(p1, p2, p3, p4, cell);
+	
+		startX += GL_CELL_WIDTH_AND_HEIGHT;
 		if((i+1)%10 == 0) {
 			startX = START_X;
-			startY = startY + COLUMN_DISTANCE;
+			startY = startY + GL_CELL_WIDTH_AND_HEIGHT;
 		}
 	}
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -215,10 +251,21 @@ void slInitWindowConfig (void)
     gluOrtho2D(0, 1560, 840, 0); 
 } 
 
+void slMouseClick() {
+	//printf("esss");
+}
+
+void slKeyboard(unsigned char key,
+              int x, int y)
+{
+	diceValue = slRollTheDice();
+	slRunBoardComputation(board, &player1, diceValue);
+	glutPostRedisplay();
+}
+
+
 int main(int argc, char** argv) {
-	struct Player p1 = {
-		0, false
-	};
+	
 	// Board init
 	slBootstrapBoard(board);
 	//slDebugBoard(board);
@@ -235,5 +282,10 @@ int main(int argc, char** argv) {
     glutCreateWindow("Snake and Ladder"); 
 	slInitWindowConfig();
 	glutDisplayFunc(slDrawBoard);
-	glutMainLoop(); 
+	glutMouseFunc(slMouseClick);
+
+	 // Keyboard event handler
+    glutKeyboardFunc(slKeyboard);
+	glutMainLoop();
+	glFinish();
 }

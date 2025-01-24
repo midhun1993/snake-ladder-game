@@ -32,6 +32,11 @@ struct Player {
 	bool playerIsInBoard;
 };
 
+struct Point {
+	int x;
+	int y;
+};
+
 struct SnakePosition snakePos[GL_SNAKE_COUNT] = {
 	{47, 47 - 26},
 	{49, 49 - 11},
@@ -138,16 +143,51 @@ void slStartGame( struct Column *board, struct Player *p1) {
 	}
 
 }
+
+void slDrawCell(struct Point p1, struct Point p2, struct Point p3, struct Point p4){
+    glBegin(GL_POLYGON);
+        glVertex2i(p1.x, p1.y);
+        glVertex2i(p2.x, p2.y);
+        glVertex2i(p3.x, p3.y);
+        glVertex2i(p4.x, p4.y);
+    glEnd();
+}
+
+
 void slDrawBoard(void) {
+	// We are planing to draw equal size column 
+	const int COLUMN_DISTANCE = 10;
+	const int START_X  = 10;
+	const int START_Y = 10;
+
 	glClear(GL_COLOR_BUFFER_BIT); 
-    glBegin(GL_POINTS); 
-    float x, y, z, w; 
-	 
-	// for ( i = 0; i <GL_COLUMNS_SIZE; i++ ) 
-    // { 
-	// 	/** Todo will write the logic soon */
-	// 	glVertex2i(x, y); 
-    // } 
+	glLineWidth(30);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	int startX = START_X;
+	int startY = START_Y;
+
+	for(int i =0; i < GL_COLUMNS_SIZE; i++) {
+		startY += COLUMN_DISTANCE;
+		if((i+1)%10 == 0) {
+			startX = START_X;
+			startY = startY + COLUMN_DISTANCE;
+		}
+		struct Point p1, p2, p3, p4;	    
+		p1.x = startX;
+		p1.y = startY;
+
+		p2.x = startX + COLUMN_DISTANCE;
+		p2.y = startY;
+
+		p3.x = startX + COLUMN_DISTANCE;
+		p3.y = startY + COLUMN_DISTANCE;
+
+		p4.x = startX;
+		p4.y = startY + COLUMN_DISTANCE;
+		slDrawCell(p1, p2, p3, p4);
+	}
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnd(); 
     glFlush(); 	
 }
@@ -165,12 +205,11 @@ void slInitWindowConfig (void)
     glMatrixMode(GL_PROJECTION);  
     glLoadIdentity(); 
       
-    // No idea what it's 
-    gluOrtho2D(-780, 780, -420, 420); 
+    // This is the base of co-ordinate system 
+    gluOrtho2D(0, 1560, 840, 0); 
 } 
 
 int main(int argc, char** argv) {
-	
 	struct Player p1 = {
 		0, false
 	};
@@ -190,9 +229,5 @@ int main(int argc, char** argv) {
     glutCreateWindow("Snake and Ladder"); 
 	slInitWindowConfig();
 	glutDisplayFunc(slDrawBoard);
-	
-
 	glutMainLoop(); 
-
-
 }

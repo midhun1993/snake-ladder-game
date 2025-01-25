@@ -3,21 +3,49 @@
 #include<GL/freeglut.h>
 #include "board.h"
 #include "gui.h"
+#include "player.h"
 #include<stdio.h>
+
+void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius) {
+    int numSegments = 100; // Number of segments for smoothness
+    GLfloat angle;
+
+    glColor3f(0.0f, 0.5f, 1.0f); 
+
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x, y); // Center of the circle
+
+    for (int i = 0; i <= numSegments; i++) {
+        angle = i * 2.0f * 3.1415926f / numSegments; // Calculate the angle
+        GLfloat dx = radius * cosf(angle);          // X coordinate
+        GLfloat dy = radius * sinf(angle);          // Y coordinate
+        glVertex2f(x + dx, y + dy);
+    }
+
+    glEnd();
+}
 
 
 void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
+     int *totalPlayerCount = slGetPlayerCount();
+    
 
 	char colstr[5];
 	sprintf(colstr, "%d", cell.pos);
+    glColor3f(0.0, 0.0, 0.0); 
 	
 	glRasterPos3f(p3.x - 20, p3.y - 10, 1);
 	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
+    for(int k=0; k < *totalPlayerCount; k++) {
+        SlPlayer * player =  slGetPlayers(k);
+        if(player->playerIsInBoard && player->position == cell.pos) {
+            GLfloat x = p1.x + GL_CELL_WIDTH_AND_HEIGHT/2;
+            GLfloat y = p1.y + GL_CELL_WIDTH_AND_HEIGHT/2;
+            drawFilledCircle(x, y, 10);     
+        }
+    }
 
-	// if(player1.playerIsInBoard && player1.position == cell.pos) {
-	// 	glRasterPos3f(p1.x + 20, p1.y + 10, 1);
-	// 	glutBitmapString(GLUT_BITMAP_8_BY_13, "You");
-	// }
+	
 
     glBegin(GL_POLYGON);
         glVertex2i(p1.x, p1.y);
@@ -67,8 +95,8 @@ void slDrawBoard(void) {
 		}
 	}
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glEnd(); 
     glFlush(); 	
+    
 }
 
 // function to initialize 

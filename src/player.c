@@ -17,6 +17,13 @@ void slAddPlayer(SlPlayer player) {
     }
 }
 
+SlPlayer * slGetPlayers(int k) {
+    return slPlayers + k;
+}
+
+int * slGetPlayerCount() {
+    return &totalPlayerCount;
+}
 void slDebugPlayers(SlPlayer players[SL_PLAYER_COUNT]) {
     for (int i=0; i < totalPlayerCount; i++) {
         printf("Player Name: %s\n", slPlayers[i].name);

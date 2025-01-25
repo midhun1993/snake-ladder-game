@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 	// slDebugBoard(slBoardInstance);
 	SlPlayer player = {
 		"Midhun",
-		0,
+		2,
 		true
 	};
 	slAddPlayer(player);

@@ -11,14 +11,14 @@ int main(int argc, char** argv) {
 	SlPlayer player1 = {
 		"Midhun",
 		1,
-		true,
+		false,
 		{255.0f, 75.0f, 0.0f}
 	};
 
 	SlPlayer player2 = {
 		"Asha",
 		1,
-		true,
+		false,
 		{255.0f, 0.0f, 0.0f}
 	};
 	slAddPlayer(player1);

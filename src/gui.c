@@ -7,6 +7,9 @@
 #include "engine.h"
 #include<stdio.h>
 
+#define SL_MAX_WIDTH_OF_CANVAS  1560
+#define SL_MAX_HEIGHT_OF_CANVAS  840
+
 void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius,  SlPlayer * player) {
     int numSegments = 100; // Number of segments for smoothness
     GLfloat angle;
@@ -25,15 +28,24 @@ void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius,  SlPlayer * player) 
     glEnd();
 }
 
+void slPlayersCards() {
+    int *totalPlayerCount = slGetPlayerCount();
+    int startWidth = SL_CELL_COUNT * 10  + 10;
+     for(int k=0; k < *totalPlayerCount; k++) {
+        SlPlayer * player =  slGetPlayers(k);
+        glRasterPos3f(startWidth,  15, 1);
+        glutBitmapString(GLUT_BITMAP_8_BY_13, player->name);
+        startWidth += 150;
+     }
+
+}
+
 
 void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
-     int *totalPlayerCount = slGetPlayerCount();
-    
-
-	char colstr[5];
+    int *totalPlayerCount = slGetPlayerCount();
+    char colstr[5];
 	sprintf(colstr, "%d", cell.pos);
-     
-	
+    
 	glRasterPos3f(p3.x - 20, p3.y - 10, 1);
 	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
     for(int k=0; k < *totalPlayerCount; k++) {
@@ -43,6 +55,16 @@ void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
             GLfloat y = p1.y + GL_CELL_WIDTH_AND_HEIGHT/2;
             drawFilledCircle(x, y, 10, player);     
         }
+
+       if(cell.isSnakeMouth) {
+            glRasterPos3f(p1.x + 5,  p1.y + 5, 1);
+            glutBitmapString(GLUT_BITMAP_8_BY_13, "Snake Mouth");
+	    }
+
+        if(cell.isLadderEntry) {
+            glRasterPos3f(p1.x + 5, p1.y + 10, 1);
+            glutBitmapString(GLUT_BITMAP_8_BY_13, "Ladder Start");
+	    }
     }
 
 	
@@ -68,6 +90,8 @@ void slDrawBoard(void) {
 	sprintf(colstr, "%d",slDiceValue);
 	glRasterPos3f(1560 - 20, 10, 1);
 	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
+
+    slPlayersCards();
 	
 	int startX = START_X;
 	int startY = START_Y;
@@ -113,7 +137,7 @@ void slInitWindowConfig (void)
     glLoadIdentity(); 
       
     // This is the base of co-ordinate system 
-    gluOrtho2D(0, 1560, 840, 0); 
+    gluOrtho2D(0, SL_MAX_WIDTH_OF_CANVAS, SL_MAX_HEIGHT_OF_CANVAS, 0); 
 } 
 
 

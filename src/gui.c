@@ -4,14 +4,14 @@
 #include "board.h"
 #include "gui.h"
 #include "player.h"
+#include "engine.h"
 #include<stdio.h>
 
-void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius) {
+void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius,  SlPlayer * player) {
     int numSegments = 100; // Number of segments for smoothness
     GLfloat angle;
-
-    glColor3f(0.0f, 0.5f, 1.0f); 
-
+    printf("color %f, %f, %f",player->colorVec[0],player->colorVec[1],player->colorVec[2]);
+    glColor3f(player->colorVec[0],player->colorVec[1],player->colorVec[2]); 
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(x, y); // Center of the circle
 
@@ -32,7 +32,7 @@ void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
 
 	char colstr[5];
 	sprintf(colstr, "%d", cell.pos);
-    glColor3f(0.0, 0.0, 0.0); 
+     
 	
 	glRasterPos3f(p3.x - 20, p3.y - 10, 1);
 	glutBitmapString(GLUT_BITMAP_8_BY_13, colstr);
@@ -41,12 +41,12 @@ void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
         if(player->playerIsInBoard && player->position == cell.pos) {
             GLfloat x = p1.x + GL_CELL_WIDTH_AND_HEIGHT/2;
             GLfloat y = p1.y + GL_CELL_WIDTH_AND_HEIGHT/2;
-            drawFilledCircle(x, y, 10);     
+            drawFilledCircle(x, y, 10, player);     
         }
     }
 
 	
-
+    glColor3f(0.0, 0.0, 0.0);
     glBegin(GL_POLYGON);
         glVertex2i(p1.x, p1.y);
         glVertex2i(p2.x, p2.y);
@@ -116,17 +116,8 @@ void slInitWindowConfig (void)
     gluOrtho2D(0, 1560, 840, 0); 
 } 
 
-void slMouseClick() {
-	//printf("esss");
-}
 
-void slKeyboard(unsigned char key,
-              int x, int y)
-{
-    slDiceValue = slRollTheDice();
-	//slRunBoardComputation(board, &player1, slDiceValue);
-	glutPostRedisplay();
-}
+
 
 
 void slGameWindowInit(int * argc, char ** argv) {
@@ -142,8 +133,7 @@ void slGameWindowInit(int * argc, char ** argv) {
     glutCreateWindow("Snake and Ladder"); 
 	slInitWindowConfig();
 	glutDisplayFunc(slDrawBoard);
-	glutMouseFunc(slMouseClick);
-
+	
 	 // Keyboard event handler
     glutKeyboardFunc(slKeyboard);
 	glutMainLoop();

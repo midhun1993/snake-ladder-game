@@ -8,12 +8,21 @@ int main(int argc, char** argv) {
 	slPlayers;
 	slBootstrapBoard(slBoardInstance); 
 	// slDebugBoard(slBoardInstance);
-	SlPlayer player = {
+	SlPlayer player1 = {
 		"Midhun",
-		2,
-		true
+		1,
+		true,
+		{255.0f, 75.0f, 0.0f}
 	};
-	slAddPlayer(player);
-	//slDebugPlayers(slPlayers);
-	slGameWindowInit(&argc, argv);
+
+	SlPlayer player2 = {
+		"Asha",
+		1,
+		true,
+		{255.0f, 0.0f, 0.0f}
+	};
+	slAddPlayer(player1);
+	slAddPlayer(player2);
+	slDebugPlayers(slPlayers);
+	slGameWindowInit(&argc, argv); 
 }

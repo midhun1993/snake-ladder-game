@@ -13,6 +13,7 @@ typedef struct
     char name[50];
     int position;
 	bool playerIsInBoard;
+    float colorVec[3];
    
 } SlPlayer;
 
@@ -21,4 +22,5 @@ void slAddPlayer(SlPlayer player);
 void slDebugPlayers(SlPlayer slAddPlayers[SL_PLAYER_COUNT]);
 SlPlayer * slGetPlayers(int k);
 int * slGetPlayerCount(void);
+int * slGetCurrentPlayer(void);
 #endif 

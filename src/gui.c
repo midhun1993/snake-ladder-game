@@ -10,10 +10,33 @@
 #define SL_MAX_WIDTH_OF_CANVAS  1560
 #define SL_MAX_HEIGHT_OF_CANVAS  840
 
-void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius,  SlPlayer * player) {
+SlPoint slCellStartCordsDict[SL_CELL_COUNT];
+
+SlPoint slGetPointByIndex(int idx) {
+    return slCellStartCordsDict[idx];
+}
+
+// todo
+void generateSineWave(SlPoint start, SlPoint end) {
+    double wave_height = 2;
+    double num_waves = 2;
+    // Calculate parameters
+    double A = wave_height / 2;                 // Amplitude
+    double B = 2 * M_PI * num_waves / (x2 - x1); // Frequency
+    double D = (y1 + y2) / 2;                   // Vertical shift
+    double step = (x2 - x1) / NUM_POINTS;       // Step size for x values
+
+    printf("x\ty\n");
+    for (int i = 0; i <= NUM_POINTS; i++) {
+        double x = x1 + i * step;               // Calculate x
+        double y = A * sin(B * (x - x1)) + D;   // Sine wave equation
+        printf("%.2f\t%.2f\n", x, y);           // Print the result
+    }
+}
+
+void slDrawFilledCircle(GLfloat x, GLfloat y, GLfloat radius,  SlPlayer * player) {
     int numSegments = 100; // Number of segments for smoothness
     GLfloat angle;
-    printf("color %f, %f, %f",player->colorVec[0],player->colorVec[1],player->colorVec[2]);
     glColor3f(player->colorVec[0],player->colorVec[1],player->colorVec[2]); 
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(x, y); // Center of the circle
@@ -33,7 +56,9 @@ void slPlayersCards() {
     int startWidth = SL_CELL_COUNT * 10  + 10;
      for(int k=0; k < *totalPlayerCount; k++) {
         SlPlayer * player =  slGetPlayers(k);
-        glRasterPos3f(startWidth,  15, 1);
+        slDrawFilledCircle(startWidth, 15, 10, player);
+        glColor3f(0.0, 0.0, 0.0); 
+        glRasterPos3f(startWidth + 20,  15, 1);
         glutBitmapString(GLUT_BITMAP_8_BY_13, player->name);
         startWidth += 150;
      }
@@ -53,18 +78,18 @@ void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
         if(player->playerIsInBoard && player->position == cell.pos) {
             GLfloat x = p1.x + GL_CELL_WIDTH_AND_HEIGHT/2;
             GLfloat y = p1.y + GL_CELL_WIDTH_AND_HEIGHT/2;
-            drawFilledCircle(x, y, 10, player);     
+            slDrawFilledCircle(x, y, 10, player);     
         }
 
-       if(cell.isSnakeMouth) {
-            glRasterPos3f(p1.x + 5,  p1.y + 5, 1);
-            glutBitmapString(GLUT_BITMAP_8_BY_13, "Snake Mouth");
-	    }
+    //    if(cell.isSnakeMouth) {
+    //         glRasterPos3f(p1.x + 5,  p1.y + 5, 1);
+    //         glutBitmapString(GLUT_BITMAP_8_BY_13, "Snake Mouth");
+	//     }
 
-        if(cell.isLadderEntry) {
-            glRasterPos3f(p1.x + 5, p1.y + 10, 1);
-            glutBitmapString(GLUT_BITMAP_8_BY_13, "Ladder Start");
-	    }
+    //     if(cell.isLadderEntry) {
+    //         glRasterPos3f(p1.x + 5, p1.y + 10, 1);
+    //         glutBitmapString(GLUT_BITMAP_8_BY_13, "Ladder Start");
+	//     }
     }
 
 	
@@ -75,6 +100,26 @@ void slDrawCell(SlPoint p1, SlPoint p2, SlPoint p3, SlPoint p4, SlCell cell){
         glVertex2i(p3.x, p3.y);
         glVertex2i(p4.x, p4.y);
     glEnd();
+}
+
+void slDrawSnakes() {
+    SlSnakePositionList *positionList = slGetSnakePosition();
+    for(int k = 0; k < SL_SNAKE_COUNT; k++) {
+        SlSnakePosition * snake = *positionList + k;
+        int snakeMouthStartIndx = snake->snakeMouthPos -1 ;
+        int snakeEndIndex =  snake->snakeMouthPos - snake->subValue - 1;
+        SlPoint startPoint = slGetPointByIndex(snakeMouthStartIndx);
+        SlPoint endPoint = slGetPointByIndex(snakeEndIndex);
+        float adjustToCenterVal = GL_CELL_WIDTH_AND_HEIGHT / 2;
+         printf("Line x:%d, %d \n", snakeMouthStartIndx, snakeEndIndex);
+        printf("Line x:%f, %f \n", startPoint.x + adjustToCenterVal,  startPoint.y + adjustToCenterVal);
+        printf("Line x:%f, %f \n", endPoint.x + adjustToCenterVal,  endPoint.y + adjustToCenterVal);
+        glLineWidth(20);
+        glBegin(GL_LINES);
+            glVertex2f(startPoint.x + adjustToCenterVal, startPoint.y + adjustToCenterVal);
+            glVertex2f(endPoint.x + adjustToCenterVal, endPoint.y + adjustToCenterVal);
+        glEnd();
+    }
 }
 
 void slDrawBoard(void) {
@@ -109,16 +154,17 @@ void slDrawBoard(void) {
 
 		p4.x = startX;
 		p4.y = startY + GL_CELL_WIDTH_AND_HEIGHT;
-		SlCell cell = slFindCell(i);
+        SlCell cell = slFindCell(i);
+        slCellStartCordsDict[cell.pos - 1] = p1;
 		slDrawCell(p1, p2, p3, p4, cell);
-	
-		startX += GL_CELL_WIDTH_AND_HEIGHT;
+        startX += GL_CELL_WIDTH_AND_HEIGHT;
 		if((i+1)%10 == 0) {
 			startX = START_X;
 			startY = startY + GL_CELL_WIDTH_AND_HEIGHT;
 		}
 	}
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    slDrawSnakes();
     glFlush(); 	
     
 }
@@ -140,13 +186,8 @@ void slInitWindowConfig (void)
     gluOrtho2D(0, SL_MAX_WIDTH_OF_CANVAS, SL_MAX_HEIGHT_OF_CANVAS, 0); 
 } 
 
-
-
-
-
 void slGameWindowInit(int * argc, char ** argv) {
-   
-	glutInit(argc, argv); 
+    glutInit(argc, argv); 
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); 
       
     // giving window size in X- and Y- direction 

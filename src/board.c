@@ -5,11 +5,7 @@
 #include<stdio.h>
 #include <stdlib.h>
 
-struct  SlSnakePosition
-{
-   int snakeMouthPos;
-   int subValue;
-};
+
 
 struct SlLadderPosition {
 	int ladderEntryPos;
@@ -17,7 +13,7 @@ struct SlLadderPosition {
 };
 
 
-struct SlSnakePosition snakePositions[SL_SNAKE_COUNT] = {
+SlSnakePosition snakePositions[SL_SNAKE_COUNT] = {
 	{47, 47 - 26},
 	{49, 49 - 11},
 	{58, 58 - 41},
@@ -101,6 +97,10 @@ void slDebugBoard(SlCell *board) {
 		int indx = SL_CELL_COUNT - (r * 10) + mod ;
 		return slBoardInstance[indx];
 	}
+}
+
+SlSnakePositionList * slGetSnakePosition() {
+	return &snakePositions;
 }
 
 

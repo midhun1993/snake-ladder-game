@@ -7,3 +7,7 @@ build:
 	gcc ./src/main.c -o ./out/main -lncurses -lGL -lGLU -lglut -lm  -L./out -lboard -lplayer -lgui -lengine
 debug: 
 	./debug.sh
+
+all:
+	make shared
+	make build

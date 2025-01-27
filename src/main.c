@@ -9,14 +9,14 @@ int main(int argc, char** argv) {
 	slBootstrapBoard(slBoardInstance); 
 	// slDebugBoard(slBoardInstance);
 	SlPlayer player1 = {
-		"Midhun",
+		"Player 1",
 		1,
 		false,
 		{255.0f, 75.0f, 0.0f}
 	};
 
 	SlPlayer player2 = {
-		"Asha",
+		"Player 2",
 		1,
 		false,
 		{255.0f, 0.0f, 0.0f}
